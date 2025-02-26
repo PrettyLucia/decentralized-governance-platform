@@ -52,3 +52,30 @@
         )
     )
 )
+
+;; Helper function to get a proposal by ID
+(define-private (get-proposal-by-id (id uint))
+    (unwrap-panic (element-at (var-get proposals) (- id u1)))
+)
+
+
+;; Function to get proposal details
+(define-read-only (get-proposal (proposal-id uint))
+    (if (proposal-exists proposal-id)
+        (ok (get-proposal-by-id proposal-id))
+        (err u9)
+    )
+)
+
+;; Function to get user's vote on a proposal
+(define-read-only (get-user-vote (proposal-id uint) (user principal))
+    (default-to 
+        { support: false } 
+        (map-get? votes { user: user, proposal: proposal-id })
+    )
+)
+
+;; Function to get all proposals
+(define-read-only (get-all-proposals)
+    (ok (var-get proposals))
+)
