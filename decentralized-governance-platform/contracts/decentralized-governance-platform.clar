@@ -5,6 +5,22 @@
 ;; Define the governance token contract address
 (define-constant governance-token-contract 'ST2NEB84ASENDXKYGJPQW86YXQCEFEX2ZQPG87ND)
 
+
+;; Error codes
+(define-constant err-unauthorized u1)
+(define-constant err-proposal-not-found u2)
+(define-constant err-voting-closed u3)
+(define-constant err-already-voted u4)
+(define-constant err-execute-not-found u5)
+(define-constant err-voting-not-ended u6)
+(define-constant err-already-executed u7)
+(define-constant err-quorum-not-reached u8)
+(define-constant err-proposal-query-failed u9)
+(define-constant err-insufficient-tokens u10)
+(define-constant err-proposal-canceled u11)
+(define-constant err-timelock-not-expired u12)
+(define-constant err-proposal-threshold u13)
+
 ;; Define the proposal structure
 (define-data-var proposals
     (list 100
@@ -87,6 +103,7 @@
 )
 
 
+
 ;; Define the proposal status enum (NEW FEATURE)
 (define-constant status-active u1)
 (define-constant status-canceled u2)
@@ -121,4 +138,23 @@
         timelock-period: timelock-period,
         execution-deadline: execution-deadline
     }
+)
+
+;; Track total proposals created
+(define-data-var proposal-count uint u0)
+
+
+;; NEW FEATURE: Update governance parameters (admin only)
+(define-public (update-governance-params (new-params {
+        proposal-threshold: uint,
+        quorum-requirement: uint,
+        voting-period: uint, 
+        timelock-period: uint,
+        execution-deadline: uint
+    }))
+    (begin
+        (asserts! (is-contract-owner tx-sender) (err err-unauthorized))
+        (var-set governance-params new-params)
+        (ok true)
+    )
 )
