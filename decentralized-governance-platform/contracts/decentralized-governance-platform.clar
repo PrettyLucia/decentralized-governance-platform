@@ -256,3 +256,18 @@
     )
 )
 
+;; NEW FEATURE: Unlock tokens after lock period
+(define-public (unlock-tokens)
+    (let
+        (
+            (caller tx-sender)
+            (locked-info (default-to { amount: u0, lock-until-block: u0, voting-power-multiplier: u100 }
+                        (map-get? locked-tokens { user: caller })))
+        )
+        (asserts! (>= stacks-block-height (get lock-until-block locked-info)) (err err-timelock-not-expired))
+        
+        ;; Unlock tokens
+        (map-delete locked-tokens { user: caller })
+        (ok true)
+    )
+)
