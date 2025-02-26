@@ -313,3 +313,23 @@
             { delegate: user, amount: u0 }
             (map-get? delegations { delegator: user })))
 )
+
+;; NEW FEATURE: Get proposal multisig status
+(define-read-only (get-multisig-status (proposal-id uint))
+    (ok (default-to
+            { required-signatures: u0, signers: (list), signed-count: u0 }
+            (map-get? proposal-executors { proposal-id: proposal-id })))
+)
+
+
+;; NEW FEATURE: Check if emergency committee member
+(define-read-only (is-emergency-committee-member (user principal))
+    (is-some (index-of (var-get emergency-committee) user))
+)
+
+;; NEW FEATURE: Get vote snapshot block
+(define-read-only (get-vote-snapshot-block (proposal-id uint))
+    (ok (default-to
+            { snapshot-block: u0 }
+            (map-get? proposal-vote-snapshots { proposal-id: proposal-id })))
+)
