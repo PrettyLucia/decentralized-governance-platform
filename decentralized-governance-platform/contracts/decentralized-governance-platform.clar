@@ -292,3 +292,24 @@
             }
             (map-get? proposal-metadata { proposal-id: proposal-id })))
 )
+
+;; NEW FEATURE: Get proposal vote strategy
+(define-read-only (get-proposal-vote-strategy (proposal-id uint))
+    (ok (default-to
+            { vote-type: vote-type-standard }
+            (map-get? proposal-vote-strategies { proposal-id: proposal-id })))
+)
+
+;; NEW FEATURE: Get user's locked tokens
+(define-read-only (get-locked-tokens (user principal))
+    (ok (default-to
+            { amount: u0, lock-until-block: u0, voting-power-multiplier: u100 }
+            (map-get? locked-tokens { user: user })))
+)
+
+;; NEW FEATURE: Get user delegation info
+(define-read-only (get-delegation-info (user principal))
+    (ok (default-to
+            { delegate: user, amount: u0 }
+            (map-get? delegations { delegator: user })))
+)
