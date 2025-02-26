@@ -167,20 +167,20 @@
 (define-constant err-invalid-metadata u18)
 (define-constant err-proposal-vetoed u19)
 
-;; NEW FEATURE: Vote delegation system
+;; Vote delegation system
 (define-map delegations
     { delegator: principal }
     { delegate: principal, amount: uint }
 )
 
 
-;; NEW FEATURE: Per-user proposal creation limits
+;; Per-user proposal creation limits
 (define-map proposal-creation-limits
     { user: principal }
     { count: uint, last-reset-block: uint }
 )
 
-;; NEW FEATURE: Proposal metadata for additional information
+;; Proposal metadata for additional information
 (define-map proposal-metadata
     { proposal-id: uint }
     { 
@@ -190,3 +190,28 @@
         discussion-forum: (string-ascii 255)
     }
 )
+
+;; Emergency veto power
+(define-data-var emergency-committee 
+    (list 5 principal)
+    (list contract-owner)
+)
+
+;; Vote types (separate from the abstain feature)
+(define-constant vote-type-standard u0)
+(define-constant vote-type-quadratic u1)
+(define-constant vote-type-conviction u2)
+
+;; Voting strategy per proposal
+(define-map proposal-vote-strategies
+    { proposal-id: uint }
+    { vote-type: uint }
+)
+
+;; Snapshot block for votes
+(define-map proposal-vote-snapshots
+    { proposal-id: uint }
+    { snapshot-block: uint }
+)
+
+
