@@ -240,3 +240,19 @@
     (sqrti amount)
 )
 
+;; NEW FEATURE: Absolute value helper
+(define-private (abs (v uint))
+    v
+)
+
+;; NEW FEATURE: Revoke delegation
+(define-public (revoke-delegation)
+    (let
+        (
+            (caller tx-sender)
+        )
+        (map-delete delegations { delegator: caller })
+        (ok true)
+    )
+)
+
