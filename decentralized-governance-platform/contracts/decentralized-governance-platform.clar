@@ -214,4 +214,29 @@
     { snapshot-block: uint }
 )
 
+;; Proposal execution multisig
+(define-map proposal-executors
+    { proposal-id: uint }
+    { 
+        required-signatures: uint,
+        signers: (list 10 principal),
+        signed-count: uint
+    }
+)
+
+;; Governance token locking for boosted voting power
+(define-map locked-tokens
+    { user: principal }
+    { 
+        amount: uint, 
+        lock-until-block: uint,
+        voting-power-multiplier: uint
+    }
+)
+
+;; Helper function to calculate quadratic voting power
+(define-private (calculate-quadratic-power (amount uint))
+    ;; Square root approximation for clarity
+    (sqrti amount)
+)
 
