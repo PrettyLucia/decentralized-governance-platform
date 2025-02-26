@@ -144,7 +144,7 @@
 (define-data-var proposal-count uint u0)
 
 
-;; NEW FEATURE: Update governance parameters (admin only)
+;; Update governance parameters (admin only)
 (define-public (update-governance-params (new-params {
         proposal-threshold: uint,
         quorum-requirement: uint,
@@ -158,3 +158,11 @@
         (ok true)
     )
 )
+
+;; NEW ERROR CODES
+(define-constant err-invalid-vote-type u14)
+(define-constant err-delegate-not-allowed u15)
+(define-constant err-proposal-limit-reached u16)
+(define-constant err-insufficient-delegation u17)
+(define-constant err-invalid-metadata u18)
+(define-constant err-proposal-vetoed u19)
