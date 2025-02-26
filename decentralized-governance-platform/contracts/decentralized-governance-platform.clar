@@ -17,7 +17,13 @@
             end-block: uint,
             for-votes: uint,
             against-votes: uint,
-            executed: bool
+            abstain-votes: uint, ;; NEW FEATURE: Abstain option
+            executed: bool,
+            canceled: bool, ;; NEW FEATURE: Cancellation tracking
+            timelock-end: uint, ;; NEW FEATURE: Timelock before execution
+            execution-data: (optional (buff 1024)), ;; NEW FEATURE: Store execution data
+            status: uint, ;; NEW FEATURE: Status enum
+            created-at: uint ;; NEW FEATURE: Creation timestamp
         }
     )
     (list)
@@ -79,3 +85,23 @@
 (define-read-only (get-all-proposals)
     (ok (var-get proposals))
 )
+
+
+;; Define the proposal status enum (NEW FEATURE)
+(define-constant status-active u1)
+(define-constant status-canceled u2)
+(define-constant status-defeated u3)
+(define-constant status-succeeded u4)
+(define-constant status-queued u5)
+(define-constant status-executed u6)
+(define-constant status-expired u7)
+
+;; Define proposal creation threshold (NEW FEATURE)
+(define-constant proposal-threshold u100000) ;; Minimum tokens required to create proposal
+
+;; Define timelock period (NEW FEATURE)
+(define-constant timelock-period u4320) ;; ~3 days in blocks
+
+;; Define proposal expiration period (NEW FEATURE)
+(define-constant execution-deadline u28800) ;; ~20 days in blocks
+
