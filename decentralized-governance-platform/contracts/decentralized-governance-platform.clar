@@ -23,3 +23,15 @@
     (list)
 )
 
+;; Define the votes structure
+(define-map votes 
+    { user: principal, proposal: uint } 
+    { support: bool }
+)
+
+
+;; Define the quorum threshold (e.g., 10% of total token supply)
+(define-constant quorum-threshold u1000000) ;; Replace with actual quorum value
+
+;; Define the voting period length in blocks (e.g., 14400 blocks ~ 10 days)
+(define-constant voting-period u14400)
