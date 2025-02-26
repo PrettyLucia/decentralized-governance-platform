@@ -271,3 +271,24 @@
         (ok true)
     )
 )
+
+;; NEW FEATURE: Update emergency committee
+(define-public (update-emergency-committee (new-committee (list 5 principal)))
+    (begin
+        (asserts! (is-contract-owner tx-sender) (err err-unauthorized))
+        (var-set emergency-committee new-committee)
+        (ok true)
+    )
+)
+
+;; Get proposal metadata
+(define-read-only (get-proposal-metadata (proposal-id uint))
+    (ok (default-to
+            { 
+                tags: (list),
+                category: "",
+                url: "",
+                discussion-forum: ""
+            }
+            (map-get? proposal-metadata { proposal-id: proposal-id })))
+)
