@@ -105,3 +105,20 @@
 ;; Define proposal expiration period (NEW FEATURE)
 (define-constant execution-deadline u28800) ;; ~20 days in blocks
 
+;; Governance parameters that can be updated
+(define-data-var governance-params
+    {
+        proposal-threshold: uint,
+        quorum-requirement: uint,
+        voting-period: uint, 
+        timelock-period: uint,
+        execution-deadline: uint
+    }
+    {
+        proposal-threshold: proposal-threshold,
+        quorum-requirement: quorum-threshold,
+        voting-period: voting-period,
+        timelock-period: timelock-period,
+        execution-deadline: execution-deadline
+    }
+)
