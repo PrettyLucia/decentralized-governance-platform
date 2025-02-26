@@ -159,10 +159,34 @@
     )
 )
 
-;; NEW ERROR CODES
+;; ERROR CODES
 (define-constant err-invalid-vote-type u14)
 (define-constant err-delegate-not-allowed u15)
 (define-constant err-proposal-limit-reached u16)
 (define-constant err-insufficient-delegation u17)
 (define-constant err-invalid-metadata u18)
 (define-constant err-proposal-vetoed u19)
+
+;; NEW FEATURE: Vote delegation system
+(define-map delegations
+    { delegator: principal }
+    { delegate: principal, amount: uint }
+)
+
+
+;; NEW FEATURE: Per-user proposal creation limits
+(define-map proposal-creation-limits
+    { user: principal }
+    { count: uint, last-reset-block: uint }
+)
+
+;; NEW FEATURE: Proposal metadata for additional information
+(define-map proposal-metadata
+    { proposal-id: uint }
+    { 
+        tags: (list 10 (string-ascii 20)),
+        category: (string-ascii 30),
+        url: (string-ascii 255),
+        discussion-forum: (string-ascii 255)
+    }
+)
