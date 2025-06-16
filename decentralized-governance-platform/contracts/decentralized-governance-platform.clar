@@ -144,7 +144,7 @@
 (define-data-var proposal-count uint u0)
 
 
-;; NEW FEATURE: Update governance parameters (admin only)
+;; Update governance parameters (admin only)
 (define-public (update-governance-params (new-params {
         proposal-threshold: uint,
         quorum-requirement: uint,
@@ -157,4 +157,179 @@
         (var-set governance-params new-params)
         (ok true)
     )
+)
+
+;; ERROR CODES
+(define-constant err-invalid-vote-type u14)
+(define-constant err-delegate-not-allowed u15)
+(define-constant err-proposal-limit-reached u16)
+(define-constant err-insufficient-delegation u17)
+(define-constant err-invalid-metadata u18)
+(define-constant err-proposal-vetoed u19)
+
+;; Vote delegation system
+(define-map delegations
+    { delegator: principal }
+    { delegate: principal, amount: uint }
+)
+
+
+;; Per-user proposal creation limits
+(define-map proposal-creation-limits
+    { user: principal }
+    { count: uint, last-reset-block: uint }
+)
+
+;; Proposal metadata for additional information
+(define-map proposal-metadata
+    { proposal-id: uint }
+    { 
+        tags: (list 10 (string-ascii 20)),
+        category: (string-ascii 30),
+        url: (string-ascii 255),
+        discussion-forum: (string-ascii 255)
+    }
+)
+
+;; Emergency veto power
+(define-data-var emergency-committee 
+    (list 5 principal)
+    (list contract-owner)
+)
+
+;; Vote types (separate from the abstain feature)
+(define-constant vote-type-standard u0)
+(define-constant vote-type-quadratic u1)
+(define-constant vote-type-conviction u2)
+
+;; Voting strategy per proposal
+(define-map proposal-vote-strategies
+    { proposal-id: uint }
+    { vote-type: uint }
+)
+
+;; Snapshot block for votes
+(define-map proposal-vote-snapshots
+    { proposal-id: uint }
+    { snapshot-block: uint }
+)
+
+;; Proposal execution multisig
+(define-map proposal-executors
+    { proposal-id: uint }
+    { 
+        required-signatures: uint,
+        signers: (list 10 principal),
+        signed-count: uint
+    }
+)
+
+;; Governance token locking for boosted voting power
+(define-map locked-tokens
+    { user: principal }
+    { 
+        amount: uint, 
+        lock-until-block: uint,
+        voting-power-multiplier: uint
+    }
+)
+
+;; Helper function to calculate quadratic voting power
+(define-private (calculate-quadratic-power (amount uint))
+    ;; Square root approximation for clarity
+    (sqrti amount)
+)
+
+;; NEW FEATURE: Absolute value helper
+(define-private (abs (v uint))
+    v
+)
+
+;; NEW FEATURE: Revoke delegation
+(define-public (revoke-delegation)
+    (let
+        (
+            (caller tx-sender)
+        )
+        (map-delete delegations { delegator: caller })
+        (ok true)
+    )
+)
+
+;; NEW FEATURE: Unlock tokens after lock period
+(define-public (unlock-tokens)
+    (let
+        (
+            (caller tx-sender)
+            (locked-info (default-to { amount: u0, lock-until-block: u0, voting-power-multiplier: u100 }
+                        (map-get? locked-tokens { user: caller })))
+        )
+        (asserts! (>= stacks-block-height (get lock-until-block locked-info)) (err err-timelock-not-expired))
+        
+        ;; Unlock tokens
+        (map-delete locked-tokens { user: caller })
+        (ok true)
+    )
+)
+
+;; NEW FEATURE: Update emergency committee
+(define-public (update-emergency-committee (new-committee (list 5 principal)))
+    (begin
+        (asserts! (is-contract-owner tx-sender) (err err-unauthorized))
+        (var-set emergency-committee new-committee)
+        (ok true)
+    )
+)
+
+;; Get proposal metadata
+(define-read-only (get-proposal-metadata (proposal-id uint))
+    (ok (default-to
+            { 
+                tags: (list),
+                category: "",
+                url: "",
+                discussion-forum: ""
+            }
+            (map-get? proposal-metadata { proposal-id: proposal-id })))
+)
+
+;; NEW FEATURE: Get proposal vote strategy
+(define-read-only (get-proposal-vote-strategy (proposal-id uint))
+    (ok (default-to
+            { vote-type: vote-type-standard }
+            (map-get? proposal-vote-strategies { proposal-id: proposal-id })))
+)
+
+;; NEW FEATURE: Get user's locked tokens
+(define-read-only (get-locked-tokens (user principal))
+    (ok (default-to
+            { amount: u0, lock-until-block: u0, voting-power-multiplier: u100 }
+            (map-get? locked-tokens { user: user })))
+)
+
+;; NEW FEATURE: Get user delegation info
+(define-read-only (get-delegation-info (user principal))
+    (ok (default-to
+            { delegate: user, amount: u0 }
+            (map-get? delegations { delegator: user })))
+)
+
+;; NEW FEATURE: Get proposal multisig status
+(define-read-only (get-multisig-status (proposal-id uint))
+    (ok (default-to
+            { required-signatures: u0, signers: (list), signed-count: u0 }
+            (map-get? proposal-executors { proposal-id: proposal-id })))
+)
+
+
+;; NEW FEATURE: Check if emergency committee member
+(define-read-only (is-emergency-committee-member (user principal))
+    (is-some (index-of (var-get emergency-committee) user))
+)
+
+;; NEW FEATURE: Get vote snapshot block
+(define-read-only (get-vote-snapshot-block (proposal-id uint))
+    (ok (default-to
+            { snapshot-block: u0 }
+            (map-get? proposal-vote-snapshots { proposal-id: proposal-id })))
 )
